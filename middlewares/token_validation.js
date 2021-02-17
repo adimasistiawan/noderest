@@ -6,6 +6,7 @@ module.exports = {
         if(token){
             token = token.slice(7)
             verify(token, '1234',(err, decoded)=>{
+                req.user = decoded.result;
                 if(err){
                      return res.json({
                          success:0,
