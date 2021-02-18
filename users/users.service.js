@@ -5,7 +5,7 @@ const conn = require('../connection')
 module.exports = {
     get: (callback)=>{
         conn.query(
-            'select * from users where status = "pegawai"',
+            'select * from user where status = "pegawai"',
             [],
             (err, results)=>{
                 if(err){
@@ -18,7 +18,7 @@ module.exports = {
 
     getById: (data,callback)=>{
         conn.query(
-            'select * from users where id = ?',
+            'select * from user where id = ?',
             [data.id],
             (err, results)=>{
                 console.log(err)
@@ -31,7 +31,7 @@ module.exports = {
     },
     insert: (data, callback)=>{
         conn.query(
-            `insert into users (nama,email,password,alamat,no_hp,status) values(?,?,?,?,?,?)`,
+            `insert into user (nama,email,password,alamat,no_hp,status) values(?,?,?,?,?,?)`,
             [data.nama, data.email, data.password,data.alamat, data.no_hp, 'pegawai'],
             (error, results, fields) =>{
                 if(error){
@@ -45,7 +45,7 @@ module.exports = {
         
         if(data.password != ''){
             conn.query(
-                `update users set nama=?, email=?, password=?, alamat=?, no_hp=? where id = ?`,
+                `update user set nama=?, email=?, password=?, alamat=?, no_hp=? where id = ?`,
                 [data.nama, data.email, data.password,data.alamat, data.no_hp, params.id],
                 (error, results, fields) =>{
                     if(error){
@@ -57,7 +57,7 @@ module.exports = {
         }else{
             console.log("2")
             conn.query(
-                `update users set nama = ?, email = ?, alamat = ?, no_hp = ? where id = ?`,
+                `update user set nama = ?, email = ?, alamat = ?, no_hp = ? where id = ?`,
                 [data.nama, data.email,data.alamat, data.no_hp, params.id],
                 (error, results, fields) =>{
                     if(error){
@@ -72,7 +72,7 @@ module.exports = {
     delete: (data,callback)=>{
         console.log("dsd")
         conn.query(
-            'delete from users where id = ?',
+            'delete from user where id = ?',
             [data.id],
             (err, results)=>{
                 console.log(err)
@@ -85,7 +85,7 @@ module.exports = {
     },
     getUserByEmail: (data, callback)=>{
         conn.query(
-            `select * from users where email = ?`,
+            `select * from user where email = ?`,
             [data],
             (error, results, fields)=>{
                 if(error){

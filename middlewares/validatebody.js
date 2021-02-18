@@ -13,5 +13,11 @@ module.exports = {
         nama: joi.required(),
         alamat: joi.string().required(),
         no_hp: joi.string().required(),
+    }),
+    createCutiSchema: joi.object({
+        tanggal_pengajuan: joi.date().required(),
+        dari: joi.date().required(),
+        sampai: joi.date().required(),
+        alasan: joi.string().required(),
     })
 }

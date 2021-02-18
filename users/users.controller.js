@@ -183,7 +183,7 @@ module.exports = {
         })
     },
     getCurrentUser: (req,res)=>{
-        const accessToken = req.get('authorization')
+        
         console.log(req.user.id)
         return res.json({
             success:1,
