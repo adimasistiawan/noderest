@@ -1,13 +1,14 @@
 'use strict'
-const Cuti = require('./cuti.service')
+const Reimbursement = require('./service')
 const joi = require('../middlewares/validatebody')
 
 module.exports = {
-    createCuti: async (req,res)=>{
+    createReimbursement: async (req,res)=>{
         const body = req.body
-        console.log(body)
+        const file = req.file == undefined? null:req.file.filename
+        console.log(req)
         try {
-            let validate = await joi.createCutiSchema.validateAsync(body)
+            let validate = await joi.createReimbursementSchema.validateAsync(body)
             
         } catch (error) {
             return res.status(403).json({
@@ -16,7 +17,7 @@ module.exports = {
             })
         }
         const id = req.user.id
-        Cuti.insert(id,body,(err,results)=>{
+        Reimbursement.insert(id,file,body,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -30,7 +31,7 @@ module.exports = {
         })
     },
     getAll:(req,res)=>{
-        Cuti.get((err,results)=>{
+        Reimbursement.get((err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -43,10 +44,10 @@ module.exports = {
             });
         })
     },
-    getCutiById:(req,res)=>{
+    getById:(req,res)=>{
         const id = req.params.id
         const user_status = req.user.status
-        Cuti.getById(id,user_status,(err,results)=>{
+        Reimbursement.getById(id,user_status,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -59,9 +60,9 @@ module.exports = {
             });
         })
     },
-    getCutiByUser:(req,res)=>{
+    getByUser:(req,res)=>{
         const id = req.user.id
-        Cuti.getByUser(id,(err,results)=>{
+        Reimbursement.getByUser(id,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -74,25 +75,25 @@ module.exports = {
             });
         })
     },
-    deleteCuti:(req,res)=>{
-        const id = req.params.id
-        Cuti.delete(id,(err,results)=>{
-            if(err){
-                return res.status(500).json({
-                    success:0,
-                    message:"connection error"
-                })
-            }
-            return res.status(200).json({
-                success:1,
-                data:results
-            });
-        })
-    },
-    updateCutiStatus:async(req,res)=>{
+    // delete:(req,res)=>{
+    //     const id = req.params.id
+    //     Reimbursement.delete(id,(err,results)=>{
+    //         if(err){
+    //             return res.status(500).json({
+    //                 success:0,
+    //                 message:"connection error"
+    //             })
+    //         }
+    //         return res.status(200).json({
+    //             success:1,
+    //             data:results
+    //         });
+    //     })
+    // },
+    updateStatus:async(req,res)=>{
         const body = req.body
         try {
-            let validate = await joi.updateCutiSchema.validateAsync(body,{allowUnknown:true})
+            let validate = await joi.updateReimbursementSchema.validateAsync(body,{allowUnknown:true})
             
         } catch (error) {
             return res.status(403).json({
@@ -102,7 +103,7 @@ module.exports = {
         }
 
         const id = req.params.id
-        Cuti.updateStatus(id,body,(err,results)=>{
+        Reimbursement.updateStatus(id,body,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,

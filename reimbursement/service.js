@@ -3,11 +3,11 @@
 const conn = require('../connection')
 const helper = require('../helper');
 module.exports = {
-    insert: (id,data, callback)=>{
+    insert: (id,file,data, callback)=>{
         var datetime = new Date();
         var kode = helper.makeid(10);
-        conn.query(`insert into cuti(kode,user_id,tanggal_pengajuan,dari,sampai,alasan,status) values(?,?,?,?,?,?,?)`,
-        [kode,id,datetime,data.dari,data.sampai,data.alasan,"Belum Dikonfirmasi"],
+        conn.query(`insert into reimbursement(kode,user_id,tanggal_pengajuan,keterangan,bukti_pembayaran,nominal,status) values(?,?,?,?,?,?,?)`,
+        [kode,id,datetime,data.keterangan,file,data.nominal,"Belum Dikonfirmasi"],
         (error,result,fields)=>{
             if(error){
                 console.log(error)
@@ -18,8 +18,8 @@ module.exports = {
     },
     get:(callback)=>{
         conn.query(
-            `select cuti.*, user.nama from cuti inner join user on cuti.user_id = user.id order by tanggal_pengajuan desc`,
-            
+            `select reimbursement.*, user.nama from reimbursement inner join user on reimbursement.user_id = user.id order by reimbursement.tanggal_pengajuan desc`,
+            [],
             (error, result, fields)=>{
                 if(error){
                     return callback(error)
@@ -31,16 +31,15 @@ module.exports = {
     getById:(id,user_status,callback)=>{
         if(user_status == 'pegawai'){
             conn.query(
-                `select cuti.*, user.nama from cuti inner join user on cuti.user_id = user.id where cuti.id = ?`,
+                `select reimbursement.*, user.nama from reimbursement inner join user on reimbursement.user_id = user.id where reimbursement.id = ?`,
                 [id],
                 (error, result, fields)=>{
-                    
                     if(error){
                         return callback(error)
                     }
-                    if(result[0]['status'] == 'Telah Diterima'){
+                    if(result[0]['status'] == "Telah Diterima"){
                         conn.query(
-                            `update cuti set dilihat = 1 where id = ?`,
+                            `update reimbursement set dilihat = 1 where id = ?`,
                             [id],
                             (errors, results, fields)=>{
                                 if(errors){
@@ -49,14 +48,14 @@ module.exports = {
                             }
                         );
                     }
+                    
                     return callback(null,result[0])
                 }
             );
         }else{
-            console.log(result)
             conn.query(
-                `select cuti.*, user.nama from cuti inner join user on cuti.user_id = user.id where cuti.id = ?`,
-                [id],
+                `select reimbursement.*, user.nama from reimbursement inner join user on reimbursement.user_id = user.id where reimbursement.id = ?`,
+                [id, id],
                 (error, result, fields)=>{
                     if(error){
                         return callback(error)
@@ -69,7 +68,7 @@ module.exports = {
     },
     getByUser:(id,callback)=>{
         conn.query(
-            `select cuti.*, user.nama from cuti inner join user on cuti.user_id = user.id where cuti.user_id = ?`,
+            `select reimbursement.*, user.nama from reimbursement inner join user on reimbursement.user_id = user.id where reimbursement.user_id = ?`,
             [id],
             (error, result, fields)=>{
                 if(error){
@@ -81,7 +80,7 @@ module.exports = {
     },
     delete:(id,callback)=>{
         conn.query(
-            `delete from cuti where id = ?`,
+            `delete from reimbursement where id = ?`,
             [id],
             (error, result, fields)=>{
                 if(error){
@@ -96,7 +95,7 @@ module.exports = {
         var datetime = new Date();
         if(data.alasan_ditolak == ''){
             conn.query(
-                `update cuti set status = ?, tanggal_konfirmasi = ? where id = ?`,
+                `update reimbursement set status = ?, tanggal_konfirmasi = ? where id = ?`,
                 [data.status,datetime,id],
                 (error, result, fields)=>{
                     if(error){
@@ -107,7 +106,7 @@ module.exports = {
             );
         }else{
             conn.query(
-                `update cuti set status = ?, tanggal_konfirmasi = ?, alasan_ditolak = ? where id = ?`,
+                `update reimbursement set status = ?, tanggal_konfirmasi = ?, alasan_ditolak = ? where id = ?`,
                 [data.status,datetime,data.alasan_ditolak,id],
                 (error, result, fields)=>{
                     if(error){
@@ -122,7 +121,7 @@ module.exports = {
 
     getNotConfirm:(callback)=>{
         conn.query(
-            `select count(id) from cuti where status = 'Belum Dikonfirmasi'`,
+            `select count(id) from reimbursement where status = 'Belum Dikonfirmasi'`,
             (error, result, fields)=>{
                 if(error){
                     return callback(error)
@@ -134,7 +133,7 @@ module.exports = {
 
     getConfirm:(callback)=>{
         conn.query(
-            `select count(id) from cuti where status != 'Belum Dikonfirmasi' and dilihat = 0`,
+            `select count(id) from reimbursement where status != 'Belum Dikonfirmasi' and dilihat = 0`,
             (error, result, fields)=>{
                 if(error){
                     return callback(error)

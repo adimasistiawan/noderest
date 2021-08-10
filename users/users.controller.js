@@ -1,8 +1,12 @@
 'use strict';
 const User = require('./users.service')
+const Cuti = require('../cuti/cuti.service')
+const Pengumuman = require('../pengumuman/pengumuman.service')
+const Reimbursement = require('../reimbursement/service')
 const {genSaltSync, hashSync, compareSync} = require('bcrypt')
 const  Jwt = require('jsonwebtoken')
-const joi = require('../middlewares/validatebody')
+const joi = require('../middlewares/validatebody');
+const { options } = require('./users.router');
 
 
 module.exports = {
@@ -36,16 +40,20 @@ module.exports = {
             })
         })
     },
-    insertUser: (req, res)=>{
+    insertUser: async (req, res)=>{
         const body = req.body
-        let validate = joi.registerSchema.validateAsync(body)
-        validate.catch((err)=>{
-            return res.status(422).json({
+        
+        
+        try {
+            let validate = await joi.registerSchema.validateAsync(body,{allowUnknown:true})
+            
+        } catch (error) {
+            return res.status(403).json({
                 success:0,
-                message:err.details[0].message
+                message:error.details[0].message
             })
-        })
-        console.log(body)
+        }
+        
         const salt = genSaltSync(10)
         body.password = hashSync(body.password, salt)
         
@@ -72,15 +80,17 @@ module.exports = {
         })
         
     },
-    updateUser: (req, res)=>{
+    updateUser: async (req, res)=>{
         const body = req.body
-        let validate = joi.updateUserSchema.validateAsync(body)
-        validate.catch((err)=>{
-            return res.status(422).json({
+        try {
+            let validate = await joi.updateUserSchema.validateAsync(body, { allowUnknown: true})
+            
+        } catch (error) {
+            return res.status(403).json({
                 success:0,
-                message:err.details[0].message
+                message:error.details[0].message
             })
-        })
+        }
 
         const params = req.params
         console.log(body)
@@ -183,13 +193,86 @@ module.exports = {
         })
     },
     getCurrentUser: (req,res)=>{
-        
-        console.log(req.user.id)
         return res.json({
             success:1,
             message:"success",
             data:req.user
         });
         
+    },
+    homeAdmin:(req, res)=>{
+        var cuti = 0;
+        var reimbursement = 0;
+        Cuti.getNotConfirm((err, results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            cuti = results[0]['count(id)']
+            Reimbursement.getNotConfirm((err2, results2)=>{
+                if(err2){
+                    return res.status(500).json({
+                        success:0,
+                        message:"connection error"
+                    })
+                }
+                reimbursement = results2[0]['count(id)']
+                return res.json({
+                    success:1,
+                    message:"success",
+                    data:{
+                        user: req.user,
+                        reimbursement:reimbursement,
+                        cuti:cuti,
+                    }
+                });
+            })
+        })
+        
+        console.log(cuti)
+        
+    },
+
+    homePegawai:(req, res)=>{
+        var cuti = 0;
+        var reimbursement = 0;
+        Cuti.getConfirm((err, results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            cuti = results[0]['count(id)']
+            Reimbursement.getConfirm((err2, results2)=>{
+                if(err2){
+                    return res.status(500).json({
+                        success:0,
+                        message:"connection error"
+                    })
+                }
+                reimbursement = results2[0]['count(id)']
+                Pengumuman.get((err3, results3)=>{
+                    if(err3){
+                        return res.status(500).json({
+                            success:0,
+                            message:"connection error"
+                        })
+                    }
+                    return res.json({
+                        success:1,
+                        message:"success",
+                        data:{
+                            user: req.user,
+                            reimbursement:reimbursement,
+                            cuti:cuti,
+                            pengumuman:results3,
+                        }
+                    });
+                })
+            })
+        })
     }
 }

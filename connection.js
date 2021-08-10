@@ -1,10 +1,11 @@
 const mysql = require('mysql')
 const conn = mysql.createConnection({
     host: 'localhost',
-    database: 'pegawai',
+    database: 'reimbursement_app',
     user:'root',
     password:'',
-    connectTimeout:3000
+    connectTimeout:3000,
+    multipleStatements: true
 })
 
 conn.connect((err)=>{

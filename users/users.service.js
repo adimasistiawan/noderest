@@ -31,8 +31,8 @@ module.exports = {
     },
     insert: (data, callback)=>{
         conn.query(
-            `insert into user (nama,email,password,alamat,no_hp,status) values(?,?,?,?,?,?)`,
-            [data.nama, data.email, data.password,data.alamat, data.no_hp, 'pegawai'],
+            `insert into user (nama,email,password,alamat,no_hp,divisi,status) values(?,?,?,?,?,?,?)`,
+            [data.nama, data.email, data.password,data.alamat, data.no_hp,data.divisi,'pegawai'],
             (error, results, fields) =>{
                 if(error){
                     return callback(error)
@@ -45,8 +45,8 @@ module.exports = {
         
         if(data.password != ''){
             conn.query(
-                `update user set nama=?, email=?, password=?, alamat=?, no_hp=? where id = ?`,
-                [data.nama, data.email, data.password,data.alamat, data.no_hp, params.id],
+                `update user set nama=?, email=?, password=?, alamat=?, no_hp=?, divisi=? where id = ?`,
+                [data.nama, data.email, data.password,data.alamat, data.no_hp, data.divisi, params.id],
                 (error, results, fields) =>{
                     if(error){
                         return callback(error)
@@ -57,12 +57,13 @@ module.exports = {
         }else{
             console.log("2")
             conn.query(
-                `update user set nama = ?, email = ?, alamat = ?, no_hp = ? where id = ?`,
-                [data.nama, data.email,data.alamat, data.no_hp, params.id],
+                `update user set nama = ?, email = ?, alamat = ?, no_hp = ?, divisi=? where id = ?`,
+                [data.nama, data.email,data.alamat, data.no_hp, data.divisi, params.id],
                 (error, results, fields) =>{
                     if(error){
                         return callback(error)
                     }
+                    console.log(results)
                     return callback(null, results)
                 }
             )
@@ -70,7 +71,6 @@ module.exports = {
         
     },
     delete: (data,callback)=>{
-        console.log("dsd")
         conn.query(
             'delete from user where id = ?',
             [data.id],
@@ -94,5 +94,5 @@ module.exports = {
                 return callback(null, results[0])
             }
         )
-    }
+    },
 }
