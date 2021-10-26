@@ -34,9 +34,18 @@ module.exports = {
                     message:"connection error"
                 })
             }
-            return res.status(200).json({
-                success:1,
-                data: results
+            Reimbursement.getTotal(params.id,(err5, results5)=>{
+                if(err5){
+                    return res.status(500).json({
+                        success:0,
+                        message:"connection error"
+                    })
+                }
+                results['total'] = results5
+                return res.status(200).json({
+                    success:1,
+                    data: results
+                })
             })
         })
     },
@@ -56,7 +65,6 @@ module.exports = {
         
         const salt = genSaltSync(10)
         body.password = hashSync(body.password, salt)
-        
         User.getUserByEmail(body.email,(err, results)=>{
             if(results){
                 return res.status(409).json({
@@ -108,6 +116,115 @@ module.exports = {
             }
             if(results.email == body.email){
                 User.update(params,body,(err, results)=>{
+                    if(err){
+                        return res.status(500).json({
+                            success:0,
+                            message:err
+                        })
+                    }
+                    return res.status(200).json({
+                        success:1,
+                        data: results
+                    })
+                })
+            }else{
+                User.getUserByEmail(body.email,(err, results)=>{
+                    if(results){
+                        return res.status(409).json({
+                            success:0,
+                            message:"Email sudah pernah digunakan"
+                        })
+                    }else{
+                        User.update(params,body,(err, results)=>{
+                            if(err){
+                                return res.status(500).json({
+                                    success:0,
+                                    message:err
+                                })
+                            }
+                            return res.status(200).json({
+                                success:1,
+                                data: results
+                            })
+                        })
+                    }
+                })
+            }
+        })
+        
+    },
+    updateProfile: async (req, res)=>{
+        const body = req.body
+        const params = req.params
+        const salt = genSaltSync(10)
+        
+        if(body.password != ''){
+            body.password = hashSync(body.password, salt)
+        }
+        User.getById(params,(err, results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            if(results.email == body.email){
+                User.updateProfile(params,body,(err, results)=>{
+                    if(err){
+                        return res.status(500).json({
+                            success:0,
+                            message:err
+                        })
+                    }
+                    return res.status(200).json({
+                        success:1,
+                        data: results
+                    })
+                })
+            }else{
+                User.getUserByEmail(body.email,(err, results)=>{
+                    if(results){
+                        return res.status(409).json({
+                            success:0,
+                            message:"Email sudah pernah digunakan"
+                        })
+                    }else{
+                        User.update(params,body,(err, results)=>{
+                            if(err){
+                                return res.status(500).json({
+                                    success:0,
+                                    message:err
+                                })
+                            }
+                            return res.status(200).json({
+                                success:1,
+                                data: results
+                            })
+                        })
+                    }
+                })
+            }
+        })
+        
+    },
+    updateProfilePegawai: async (req, res)=>{
+        const body = req.body
+        console.log(body)
+        const params = req.params
+        const salt = genSaltSync(10)
+        
+        if(body.password != ''){
+            body.password = hashSync(body.password, salt)
+        }
+        User.getById(params,(err, results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            if(results.email == body.email){
+                User.updateProfilePegawai(params,body,(err, results)=>{
                     if(err){
                         return res.status(500).json({
                             success:0,
@@ -219,15 +336,23 @@ module.exports = {
                     })
                 }
                 reimbursement = results2[0]['count(id)']
-                return res.json({
-                    success:1,
-                    message:"success",
-                    data:{
-                        user: req.user,
-                        reimbursement:reimbursement,
-                        cuti:cuti,
+                User.getById(req.user,(err4, results4)=>{
+                    if(err4){
+                        return res.status(500).json({
+                            success:0,
+                            message:"connection error"
+                        })
                     }
-                });
+                    return res.json({
+                        success:1,
+                        message:"success",
+                        data:{
+                            user: results4,
+                            reimbursement:reimbursement,
+                            cuti:cuti,
+                        }
+                    });
+                })
             })
         })
         
@@ -238,7 +363,8 @@ module.exports = {
     homePegawai:(req, res)=>{
         var cuti = 0;
         var reimbursement = 0;
-        Cuti.getConfirm((err, results)=>{
+        const id = req.user.id
+        Cuti.getConfirm(id,(err, results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -246,7 +372,7 @@ module.exports = {
                 })
             }
             cuti = results[0]['count(id)']
-            Reimbursement.getConfirm((err2, results2)=>{
+            Reimbursement.getConfirm(id,(err2, results2)=>{
                 if(err2){
                     return res.status(500).json({
                         success:0,
@@ -261,16 +387,33 @@ module.exports = {
                             message:"connection error"
                         })
                     }
-                    return res.json({
-                        success:1,
-                        message:"success",
-                        data:{
-                            user: req.user,
-                            reimbursement:reimbursement,
-                            cuti:cuti,
-                            pengumuman:results3,
+                    User.getById(req.user,(err4, results4)=>{
+                        if(err4){
+                            return res.status(500).json({
+                                success:0,
+                                message:"connection error"
+                            })
                         }
-                    });
+                        Reimbursement.getTotal(id,(err5, results5)=>{
+                            if(err5){
+                                return res.status(500).json({
+                                    success:0,
+                                    message:"connection error"
+                                })
+                            }
+                            return res.json({
+                                success:1,
+                                message:"success",
+                                data:{
+                                    user: results4,
+                                    reimbursement:reimbursement,
+                                    cuti:cuti,
+                                    pengumuman:results3,
+                                    total:results5
+                                }
+                            });
+                        })
+                    })
                 })
             })
         })

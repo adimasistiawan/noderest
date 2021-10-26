@@ -5,7 +5,8 @@ const conn = mysql.createConnection({
     user:'root',
     password:'',
     connectTimeout:3000,
-    multipleStatements: true
+    multipleStatements: true,
+    timezone: 'Asia/Jakarta'
 })
 
 conn.connect((err)=>{

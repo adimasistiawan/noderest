@@ -30,7 +30,28 @@ module.exports = {
         })
     },
     getAll:(req,res)=>{
-        Cuti.get((err,results)=>{
+        const dari = req.params.dari
+        const sampai = req.params.sampai
+        const kode = req.params.kode
+        Cuti.get(dari, sampai, kode,(err,results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            return res.status(200).json({
+                success:1,
+                data:results
+            });
+        })
+    },
+    getHistory:(req,res)=>{
+        const id = req.params.id
+        const dari = req.params.dari
+        const sampai = req.params.sampai
+        const kode = req.params.kode
+        Cuti.getHistory(id,dari, sampai, kode,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -61,7 +82,10 @@ module.exports = {
     },
     getCutiByUser:(req,res)=>{
         const id = req.user.id
-        Cuti.getByUser(id,(err,results)=>{
+        const dari = req.params.dari
+        const sampai = req.params.sampai
+        const kode = req.params.kode
+        Cuti.getByUser(id,dari, sampai, kode,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
@@ -103,6 +127,37 @@ module.exports = {
 
         const id = req.params.id
         Cuti.updateStatus(id,body,(err,results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            return res.status(200).json({
+                success:1,
+                data:results
+            });
+        })
+    },
+    update:async(req,res)=>{
+        const id = req.params.id
+        const body = req.body
+        Cuti.update(id,body,(err,results)=>{
+            if(err){
+                return res.status(500).json({
+                    success:0,
+                    message:"connection error"
+                })
+            }
+            return res.status(200).json({
+                success:1,
+                data:results
+            });
+        })
+    },
+    delete:(req,res)=>{
+        const id = req.params.id
+        Cuti.delete(id,(err,results)=>{
             if(err){
                 return res.status(500).json({
                     success:0,
